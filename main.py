@@ -1,3 +1,6 @@
+#由于服务器故障，代码还没跑，只在自己电脑上试过没有语法错误。。。
+
+
 import csv
 
 import numpy as np
