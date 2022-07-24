@@ -1,6 +1,3 @@
-#由于服务器故障，代码还没跑，只在自己电脑上试过没有语法错误。。。
-
-
 import csv
 
 import numpy as np
@@ -86,12 +83,10 @@ def train(model,train_loader,dev_loader) :
     model.to(device)
 
     model.train()
-    criterion = nn.CrossEntropyLoss()
+
     #权重可改为数量的倒数
     weight=get_weight(train_loader)
-    criterion = nn.CrossEntropyLoss(
-        weight=torch.from_numpy(weight).float(),
-        size_average=True)
+    criterion = nn.CrossEntropyLoss(weight=torch.from_numpy(weight).float())
     criterion.to(device)
 
     optimizer = AdamW(model.parameters(), lr=1e-4)
@@ -118,9 +113,8 @@ def train(model,train_loader,dev_loader) :
 
             loss.backward()
             optimizer.step()
-
             optimizer.zero_grad()
-            #每两步输出一次信息
+
             if step % 20 == 19:
                 train_acc = correct / total
                 print("Train Epoch[{}/{}],step[{}/{}],tra_acc{:.6f} %,loss:{:.6f}".format(epoch + 1, epochs, step + 1, len(train_loader),train_acc*100,loss.item()))
@@ -136,18 +130,14 @@ def train(model,train_loader,dev_loader) :
         scheduler.step(bestAcc)
 
 def dev(model,dev_loader):
-    #将模型放到服务器上
     model.to(device)
-    #设定模式为验证模式
     model.eval()
-    #设定不会有梯度的改变仅作验证
     with torch.no_grad():
         correct = 0
         total = 0
         for step, (input_ids,token_type_ids,attention_mask,labels) in tqdm(enumerate(dev_loader),desc='Dev Itreation:'):
             input_ids,token_type_ids,attention_mask,labels=input_ids.to(device),token_type_ids.to(device),attention_mask.to(device),labels.to(device)
             out_put = model(input_ids,token_type_ids,attention_mask)
-            #print(out_put)
             _, predict = torch.max(out_put.data, 1)
             correct += (predict==labels).sum().item()
             total += labels.size(0)
